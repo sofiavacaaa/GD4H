@@ -5,6 +5,15 @@ import sys
 import zipfile
 import io
 import requests
+import openrouteservice
+import geopandas as gpd
+from shapely.geometry import Point, Polygon
+import folium
+
+API_KEY = "5b3ce3597851110001cf6248e1c21942e51e45a9ba5e6081a595bc3d"  # Replace with your actual key
+client = openrouteservice.Client(key=API_KEY)
+
+center_point = [2.3522, 48.8566]
 
 def accept_user_file():
     root = tk.Tk()
@@ -57,14 +66,36 @@ def download_bpe():
         file_name = z.namelist()[0]
         with z.open(file_name) as csv_file:
             df_bpe = pd.read_csv(csv_file, delimiter = ';')
+    df_bpe["geometry"] = df_bpe.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
     return df_bpe
+
+
+isochrone = client.isochrones(
+    locations=[center_point],  # Paris
+    profile="driving-car",
+    range=[300],  # 5, 10, 15 min in seconds
+)
+
+m = folium.Map(location=[2.3522, 48.8566], zoom_start=12)
+
+isochrone_polygon = Polygon(isochrone["features"][0]["geometry"]["coordinates"][0])
+
+folium.GeoJson(isochrone_polygon, name="Isochrone").add_to(m)
 
 df_user_add = accept_user_file()
 identify_lat_long(df_user_add)
 df_bpe = download_bpe()
+gdf = gpd.GeoDataFrame(df_bpe, geometry="geometry", crs="EPSG:4326")
+points_within_isochrone = gdf[gdf.geometry.within(isochrone_polygon)]
 
-
-
+for idx, row in points_within_isochrone.iterrows():
+    folium.Marker(
+        location=[row["latitude"], row["longitude"]],
+        popup=row["name"],
+        icon=folium.Icon(color="blue", icon="info-sign")
+    ).add_to(m)
+    
+m.save("isochrone_map.html")
         
 
         
