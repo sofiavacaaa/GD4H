@@ -3,17 +3,16 @@ from tkinter import filedialog
 import pandas as pd
 import sys
 import zipfile
-import io
 import requests
+import io
 import openrouteservice
 import geopandas as gpd
-from shapely.geometry import Point, Polygon
+import matplotlib.pyplot as plt
+from shapely.geometry import Point, Polygon, MultiPolygon, shape
 import folium
 
-API_KEY = "5b3ce3597851110001cf6248e1c21942e51e45a9ba5e6081a595bc3d"  # Replace with your actual key
-client = openrouteservice.Client(key=API_KEY)
-
-center_point = [2.3522, 48.8566]
+API_KEY_ORS = "5b3ce3597851110001cf6248e1c21942e51e45a9ba5e6081a595bc3d"  # Replace with your actual key
+client = openrouteservice.Client(key=API_KEY_ORS)
 
 def accept_user_file():
     root = tk.Tk()
@@ -66,36 +65,82 @@ def download_bpe():
         file_name = z.namelist()[0]
         with z.open(file_name) as csv_file:
             df_bpe = pd.read_csv(csv_file, delimiter = ';')
-    df_bpe["geometry"] = df_bpe.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+    df_bpe.head()
+    df_bpe["geometry"] = df_bpe.apply(lambda row: Point(row["LONGITUDE"], row["LATITUDE"]), axis=1)
     return df_bpe
 
+def download_carreaus():
+    #CARREAU_url = "https://www.insee.fr/fr/statistiques/fichier/6215138/Filosofi2017_carreaux_200m_shp.zip"
 
-isochrone = client.isochrones(
-    locations=[center_point],  # Paris
-    profile="driving-car",
-    range=[300],  # 5, 10, 15 min in seconds
-)
+    shapefile_path_1 = "/Users/cpowers/Desktop/DEPP/In_Progress/EcoLab/GD4H/Filosofi2017_carreaux_200m_shp/Filosofi2017_carreaux_200m_mart.shp"
+    shapefile_path_2 = "/Users/cpowers/Desktop/DEPP/In_Progress/EcoLab/GD4H/Filosofi2017_carreaux_200m_shp/Filosofi2017_carreaux_200m_reun.shp"
+    shapefile_path_3 = "/Users/cpowers/Desktop/DEPP/In_Progress/EcoLab/GD4H/Filosofi2017_carreaux_200m_shp/Filosofi2017_carreaux_200m_met.shp"
+    
+    carreaus_geo_1 = gpd.read_file(shapefile_path_1)
+    carreaus_geo_1 = carreaus_geo_1.to_crs(epsg=4326)
+    
+   # carreaus_geo_2 = gpd.read_file(shapefile_path_2)
+    #carreaus_geo_2 = carreaus_geo_2.to_crs(epsg=4326)
+    
+    carreaus_geo_3 = gpd.read_file(shapefile_path_3)
+    carreaus_geo_3 = carreaus_geo_3.to_crs(epsg=4326)
+    
+    carreaus_geo = gpd.GeoDataFrame(pd.concat([carreaus_geo_1,  carreaus_geo_3], ignore_index=True))
+    
+    carreaus_geo["longitude"] = carreaus_geo.geometry.centroid.x
+    carreaus_geo["latitude"] = carreaus_geo.geometry.centroid.y
+
+    return carreaus_geo
+
+def map_carreaus_osrm(carr_geo):
+    ORS_URL = "https://api.openrouteservice.org/v2/isochrones/"    
+    transport_methods = ["driving-car", "cycling-regular", "foot-walking"]
+    
+    lat = carr_geo['latitude'].iloc[1000]
+    lon = carr_geo['longitude'].iloc[1000]
+    
+    headers = {
+    "Authorization": API_KEY_ORS,
+    "Content-Type": "application/json"
+    }
+    
+    payload = {
+    "locations": [[lon, lat]],
+    "range": [900],
+    "range_type": "time"
+    }
+    
+    gdfs = []
+    for mode in transport_methods:
+        travel_url = f"{ORS_URL}{mode}"
+        osrm_response = requests.post(travel_url, json=payload, headers=headers)
+        if osrm_response.status_code != 200:
+            print(f"Error for {mode}: {osrm_response.text}")
+            continue
+        isochrone_geojson = osrm_response.json()["features"][0]["geometry"]
+        isochrone_polygon = shape(isochrone_geojson)
+        isochrone_gdf = gpd.GeoDataFrame({"transport_mode": [mode], "geometry": [isochrone_polygon]}, crs="EPSG:4326")
+        gdfs.append(isochrone_gdf)
+    merged_isochrones_gdf = gpd.GeoDataFrame(pd.concat(gdfs, ignore_index=True))
+    fig, ax = plt.subplots(figsize=(8, 8))
+    merged_isochrones_gdf.plot(ax=ax, edgecolor="red", facecolor="none", linestyle="--", label="OSRM Polygon")
+    ax.scatter(lon, lat, color="blue", marker="o", label="Centroid (Origin)")
+    plt.legend()
+    plt.show()
 
 m = folium.Map(location=[2.3522, 48.8566], zoom_start=12)
 
-isochrone_polygon = Polygon(isochrone["features"][0]["geometry"]["coordinates"][0])
+#folium.GeoJson(isochrone_gdf, style_function=lambda x: {"color": "blue"}).add_to(m)
 
-folium.GeoJson(isochrone_polygon, name="Isochrone").add_to(m)
-
-df_user_add = accept_user_file()
-identify_lat_long(df_user_add)
+#df_user_add = accept_user_file()
+#identify_lat_long(df_user_add)
 df_bpe = download_bpe()
+carreaus = download_carreaus()
+map_carreaus_osrm(carreaus)
 gdf = gpd.GeoDataFrame(df_bpe, geometry="geometry", crs="EPSG:4326")
-points_within_isochrone = gdf[gdf.geometry.within(isochrone_polygon)]
-
-for idx, row in points_within_isochrone.iterrows():
-    folium.Marker(
-        location=[row["latitude"], row["longitude"]],
-        popup=row["name"],
-        icon=folium.Icon(color="blue", icon="info-sign")
-    ).add_to(m)
-    
+pd.set_option("display.max_columns", None)
+print(carreaus.head())
 m.save("isochrone_map.html")
         
-
+m
         
