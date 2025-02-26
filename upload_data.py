@@ -14,6 +14,44 @@ import folium
 API_KEY_ORS = "5b3ce3597851110001cf6248e1c21942e51e45a9ba5e6081a595bc3d"  # Replace with your actual key
 client = openrouteservice.Client(key=API_KEY_ORS)
 
+def split_by_dom(df_bpe):
+    df_filtered = df_bpe.loc[
+        df_bpe["DOM"].isin(["D", "F", "C"]) |
+        df_bpe["TYPEQU"].isin(["E108", "E109"]) |
+        df_bpe["SDOM"].isin(["A1", "B1", "B2"])
+    ].copy()
+    df_filtered["ID"] = range(1, len(df_filtered) + 1)
+    cols_to_keep = [
+        "ID", "AN", "NOMRS", "CNOMRS", "NUMVOIE", "INDREP", "TYPVOIE", "LIBVOIE",
+        "CADR", "LIBCOM", "CODPOS", "DEPCOM", "REG", "DOM", "SDOM", "TYPEQU", "SIRET", 
+        "LAMBERT_X", "LAMBERT_Y", "LONGITUDE", "LATITUDE"
+    ]
+    existing_cols = [col for col in cols_to_keep if col in df_filtered.columns]
+    df_filtered = df_filtered[existing_cols].copy()
+
+    def process_region(df, region_code):
+        df_region = df[df["DEPCOM"].astype(str).str.startswith(region_code)].copy()
+        df_d_dom = df_region[df_region["SDOM"].isin(["D1", "D3", "D4", "D6", "D7"])].copy()
+
+        def combine_typequ(series):
+            unique_vals = series.dropna().unique()
+            return ", ".join(map(str, unique_vals))
+
+        if not df_d_dom.empty:
+            df_d_dom["TYPEQU"] = df_d_dom.groupby(["NOMRS", "LIBCOM", "DOM", "LIBVOIE"])["TYPEQU"].transform(combine_typequ)
+            df_unique_D_dom = df_d_dom.drop_duplicates(subset=["NOMRS", "LIBCOM", "DOM", "LIBVOIE"])
+        else:
+            df_unique_D_dom = df_d_dom
+
+        df_dom_rest = df_region[~df_region["SDOM"].isin(["D1", "D3", "D4", "D6", "D7"])]
+        df_unique = pd.concat([df_dom_rest, df_unique_D_dom], ignore_index=True)
+        return df_unique
+
+    martinique_df = process_region(df_filtered, "972")
+    reunion_df = process_region(df_filtered, "974")
+    
+    return martinique_df, reunion_df
+
 def accept_user_file():
     root = tk.Tk()
     root.withdraw()
