@@ -1,0 +1,9 @@
+*.jar
+*.feather
+*.csv
+*.zip
+*.shp
+*.pdf
+*.gh
+*.geojson
+*.jsonl
