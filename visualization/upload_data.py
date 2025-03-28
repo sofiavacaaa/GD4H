@@ -5,7 +5,7 @@
 #        { "metadata": $item.metadata } +
 #        (if $item.bbox then { "carreaux": ($item.bbox | tostring) } else { "carreaux": "null" } end) +
 #        (if $item.Idcar_200m then { "Idcar_200m": $item.Idcar_200m } else {} end)
-#    )' > ischrone_file.geojson
+#    )' > ischrone_file.geojson 
 
 
 import pandas as pd
