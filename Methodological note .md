@@ -3,7 +3,7 @@ This project was conducted as part of the "Policy-in-Action" module of the Écol
 
 Students : Salma El Aazdoudi, Robert Campbell Powers, Bennis Mona and Sofia Vaca. 
 
-Under the supervision of : Pierre Boyer & Franck Malherbet
+Under the supervision of : Pierre Boyer (Ecole Polytechnique, CREST) & Franck Malherbet (ENSAE, CNRS)
 
 For any questions, clarifications, or citation requests, please contact: salma.el-aazdoudi@polytechnique.edu
 
