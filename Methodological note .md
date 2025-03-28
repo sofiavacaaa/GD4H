@@ -1,5 +1,5 @@
 # Healthy Urban Planning : Accesibility and modes of access to various urban spaces
-This project was carried out as part of the "Policy-in-Action" module of the École Polytechnique-ENSAE Master's program in "Data and Economics for Public Policy. It is done for the ECOLAB team at the Ministère de la transition écologique.
+This project was conducted as part of the "Policy-in-Action" module of the École Polytechnique-ENSAE Master's program in "Data and Economics for Public Policy. It was done for ECOLAB at the Ministère de la transition écologique.
 Students : Salma El Aazdoudi, Robert Campbell Powers, Bennis Mona and Sofia Vaca. 
 Under the supervision of : Pierre Boyer & Franck Malherbet
 For any questions, clarifications, or citation requests, please contact: salma.el-aazdoudi@polytechnique.edu
