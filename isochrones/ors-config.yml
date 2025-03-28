@@ -1,0 +1,41 @@
+ors:
+  # 1) Services configuration
+  services:
+    routing:
+      enabled: true
+      profiles:
+        active:
+          - name: driving-car
+            profiles: ["driving-car"]
+  
+  # 2) Engine configuration
+  engine:
+    # Default build settings for the routing graphs
+    profile_default:
+      build:
+        source_file: D:\ECOLAB\aquitaine-latest.osm.pbf
+    # Define each profile’s details
+    profiles:
+      driving-car:
+        enabled: true
+
+  # 4) Endpoints configuration
+  endpoints:
+    isochrones:
+      enabled: true
+      attribution: "openrouteservice.org, OpenStreetMap contributors"
+      # Increase the maximum number of intervals 
+      maximum_intervals: 3
+      # Maximum number of locations in a single isochrones request
+      maximum_locations: 2
+      # Whether or not to compute the polygon area in the response
+      allow_compute_area: true
+
+      # Fast isochrones settings 
+      fastisochrones:
+        maximum_range_distance_default: 50000
+        maximum_range_time_default: 18000
+
+  # 5) Logging configuration
+  logging:
+    level: INFO
