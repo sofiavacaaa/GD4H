@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Server-Side Clustering Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      width: 100%;
+      height: 800px;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 50px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.9);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+      border: none;
+      text-decoration: none;
+    }
+    .button:hover {
+      background-color: #45a049;
+    }
+    #error-message {
+      color: red;
+      display: none;
+      margin: 10px;
+      padding: 10px;
+      background-color: #ffeeee;
+      border: 1px solid red;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    #loadingIndicator {
+      display: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="error-message"></div>
+  <div id="controls">
+    <div>
+      <label for="collectionList">Select Collection(s):</label>
+      <select id="collectionList" multiple size="5"></select>
+      <button id="loadGeojsonServerBtn" class="button">Load Data</button>
+    </div>
+    <div>
+      <label for="fieldSelect">Select Score Field:</label>
+      <select id="fieldSelect">
+        <option value="score_driving-car_300">Driving Score 300</option>
+        <option value="score_driving-car_600">Driving Score 600</option>
+        <option value="score_driving-car_900">Driving Score 900</option>
+      </select>
+    </div>
+    <div>
+      <label><input type="checkbox" id="densityToggle"> Use Density Scoring</label>
+    </div>
+    <div id="loadingIndicator">Loading...</div>
+  </div>
+  <div id="map"></div>
+
+  <link rel="icon" href="data:,">
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    function showError(message) {
+      const errorEl = document.getElementById('error-message');
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+      console.error(message);
+    }
+
+    function interpolateColor(value) {
+      const r = 255;
+      const g = Math.round(255 * (1 - value));
+      return `rgb(${r}, ${g}, 0)`;
+    }
+
+    let map, currentLayer;
+    let currentData = null;
+    let currentMode = null;
+    const clusteringThreshold = 12;
+
+    function renderData(geojson) {
+      if (currentLayer) {
+        map.removeLayer(currentLayer);
+      }
+
+      const selectedField = document.getElementById('fieldSelect').value;
+      const useDensity = document.getElementById('densityToggle').checked;
+
+      if (currentMode === "cluster") {
+        let maxScoreSum = 0;
+        geojson.features.forEach(feature => {
+          let score = useDensity ? (feature.properties.scoreSum / feature.properties.indSum || 0) : feature.properties.scoreSum;
+          maxScoreSum = Math.max(maxScoreSum, score);
+        });
+
+        currentLayer = L.geoJSON(geojson, {
+          style: function(feature) {
+            let score = useDensity ? (feature.properties.scoreSum / feature.properties.indSum || 0) : feature.properties.scoreSum;
+            let normalized = maxScoreSum > 0 ? score / maxScoreSum : 0;
+            return {
+              color: "black",
+              weight: 1,
+              opacity: 0.1,
+              fillColor: interpolateColor(normalized),
+              fillOpacity: 0.6
+            };
+          },
+          onEachFeature: function(feature, layer) {
+            if (feature.properties) {
+              let score = useDensity ? (feature.properties.scoreSum / feature.properties.indSum || 0) : feature.properties.scoreSum;
+              let popupContent = feature.properties.cluster 
+                ? `Aggregated Score: ${score.toFixed(2)}<br>` +
+                  `Count: ${feature.properties.count}<br>` +
+                  `Aggregated Men: ${feature.properties.menSum.toFixed(2)}<br>` +
+                  `Aggregated Ind: ${feature.properties.indSum.toFixed(2)}`
+                : `Score: ${JSON.stringify(feature.properties)}`;
+              layer.bindPopup(popupContent);
+            }
+          }
+        });
+      } else {
+        let maxScore = 0;
+        geojson.features.forEach(feature => {
+          let score = useDensity ? ((feature.properties[selectedField] || 0) / feature.properties.Ind || 0) : (feature.properties[selectedField] || 0);
+          maxScore = Math.max(maxScore, score);
+        });
+
+        currentLayer = L.geoJSON(geojson, {
+          style: function(feature) {
+            let score = useDensity ? ((feature.properties[selectedField] || 0) / feature.properties.Ind || 0) : (feature.properties[selectedField] || 0);
+            let normalized = maxScore > 0 ? score / maxScore : 0;
+            return {
+              color: "black",
+              weight: 1,
+              opacity: 0.1,
+              fillColor: interpolateColor(normalized),
+              fillOpacity: 0.6
+            };
+          },
+          onEachFeature: function(feature, layer) {
+            if (feature.properties) {
+              let rawScore = feature.properties[selectedField] || 0;
+              let ind = feature.properties.Ind || 0;
+              let men = feature.properties.Men ?? 'N/A';
+              let densityScore = useDensity ? (rawScore / ind || 0) : null;
+              let popupContent = `Score: ${rawScore}<br>` +
+                                 `Men: ${men}<br>` +
+                                 `Ind: ${ind}`;
+              if (useDensity) {
+                popupContent += `<br>Density Score: ${densityScore.toFixed(2)}`;
+              }
+              layer.bindPopup(popupContent);
+            }
+          }
+        });
+      }
+
+      currentLayer.addTo(map);
+    }
+
+    function fetchData() {
+      const select = document.getElementById('collectionList');
+      const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+      if (selected.length === 0) {
+        showError("Please select at least one collection.");
+        return;
+      }
+
+      const zoom = map.getZoom();
+      let mode;
+      let url = `api/geojson?collections=${selected.join(',')}`;
+
+      const bounds = map.getBounds();
+      const bbox = [
+        bounds.getWest().toFixed(6),
+        bounds.getSouth().toFixed(6),
+        bounds.getEast().toFixed(6),
+        bounds.getNorth().toFixed(6)
+      ].join(',');
+
+      const field = document.getElementById('fieldSelect').value;
+
+      if (zoom < clusteringThreshold) {
+        mode = "cluster";
+        url += `&cluster=true&bbox=${bbox}&zoom=${zoom}&field=${field}`;
+      } else {
+        mode = "raw";
+        url += `&bbox=${bbox}&field=${field}`;
+      }
+      currentMode = mode;
+      document.getElementById('loadingIndicator').style.display = 'block';
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            return response.json().then(errorData => {
+              throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          currentData = data;
+          renderData(data);
+        })
+        .catch(error => {
+          showError("Error fetching data: " + error.message);
+        })
+        .finally(() => {
+          document.getElementById('loadingIndicator').style.display = 'none';
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      map = L.map('map').setView([-21.1, 55.5], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+      fetch('api/collections')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(collections => {
+          const select = document.getElementById('collectionList');
+          collections.forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            select.appendChild(option);
+          });
+        })
+        .catch(error => {
+          showError("Error fetching collections: " + error.message);
+        });
+
+      document.getElementById('loadGeojsonServerBtn').addEventListener('click', fetchData);
+      map.on('moveend zoomend', fetchData);
+      document.getElementById('fieldSelect').addEventListener('change', fetchData);
+      document.getElementById('densityToggle').addEventListener('change', fetchData);
+    });
+  </script>
+</body>
+</html>
