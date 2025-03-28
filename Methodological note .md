@@ -1,4 +1,7 @@
 # Healthy Urban Planning : Accesibility and modes of access to various urban spaces
+This project was carried out as part of the "Policy-in-Action" module of the École Polytechnique-ENSAE Master's program in "Data and Economics for Public Policy.
+ChatGPT a dit :
+For any questions, clarifications, or citation requests, please contact: salma.el-aazdoudi@polytechnique.edu
 
 # Table of Contents
 
@@ -40,29 +43,30 @@ Indices or indicators for accessibility to essential services linked to health a
 
 Regarding the more specific domain of social infrastructure, it is defined by Davern et al (2017) as “life-long social service needs related to health, education, early childhood, community support, community development, culture, sport and recreation, parks and emergency services”. The authors provided the following list of services comprised in this domain:
 
-Health Services: Hospitals, General Practitioners, Mental Health Services, Community Health Centres, Maternal and Child Health Centres, and Aged Care Facilities.
+- **Health Services:** Hospitals, General Practitioners, Mental Health Services, Community Health Centres, Maternal and Child Health Centres, and Aged Care Facilities.
 
-Education Services: Lifelong learning including Kindergartens, Playgroups, Primary and Secondary Schools, Universities, Vocational and Technical Tertiary Education, University of the 3rd Age, Libraries.
+- **Education Services:** Lifelong learning including Kindergartens, Playgroups, Primary and Secondary Schools, Universities, Vocational and Technical Tertiary Education, University of the 3rd Age, Libraries.
 
-Childcare: Long Day Care, Occasional Care, and Out of Hours School Care.
+- **Childcare:** Long Day Care, Occasional Care, and Out of Hours School Care.
 
-Community Support Agencies: Community Support Organisations and Centrelink.
+- **Community Support Agencies:** Community Support Organisations and Centrelink.
 
-Arts and Culture: Movie theatres, art galleries, museums, and community art centres.
+- **Arts and Culture:** Movie theatres, art galleries, museums, and community art centres.
 
-Formal Sport and Recreation: Pools, gyms, indoor and outdoor facilities.
+- **Formal Sport and Recreation:** Pools, gyms, indoor and outdoor facilities.
 
-Public Open Space: Parks and Playgrounds.
+- **Public Open Space:** Parks and Playgrounds.
 
-Community Development: Community Centres, Neighbourhood Houses, Senior Citizens Centres, Youth Services, Home & Community Care.
+- **Community Development:** Community Centres, Neighbourhood Houses, Senior Citizens Centres, Youth Services, Home & Community Care.
 
-Social Housing: Public housing, transitional housing, and housing diversity to meet the needs of varied demographic profiles.
+- **Social Housing:** Public housing, transitional housing, and housing diversity to meet the needs of varied demographic profiles.
 
-Employment
+- **Employment**
 
-Legal and Emergency Services: Fire, Police, Ambulance, and Judicial Services.
+- **Legal and Emergency Services:** Fire, Police, Ambulance, and Judicial Services.
 
-Public and Community Transport: Council Community Transport and planning that supports walking and cycling.
+- **Public and Community Transport:** Council Community Transport and planning that supports walking and cycling.
+
 
 Based on a conceptual model they developed, they found that the spatial accessibility of social infrastructure positively impacts the health and wellbeing of residents.
 
