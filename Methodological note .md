@@ -1,6 +1,5 @@
 # Healthy Urban Planning : Accesibility and modes of access to various urban spaces
 This project was carried out as part of the "Policy-in-Action" module of the École Polytechnique-ENSAE Master's program in "Data and Economics for Public Policy.
-ChatGPT a dit :
 For any questions, clarifications, or citation requests, please contact: salma.el-aazdoudi@polytechnique.edu
 
 # Table of Contents
