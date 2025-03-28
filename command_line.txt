@@ -1,3 +1,0 @@
-d
-cd D:\ECOLAB\GD4H
-java -jar ors.jar
