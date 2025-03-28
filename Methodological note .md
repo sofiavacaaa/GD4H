@@ -13,7 +13,7 @@ For any questions, clarifications, or citation requests, please contact: salma.e
 - [Description of our objectives](#description-of-our-objectives)
 - [Data description and exploration](#data-description-and-exploration)
   - [Amenities Data: Base Permanente des Équipements (BPE)](#amenities-data-base-permanente-des-équipements-bpe)
-  - [ISEE Carreaux dataset](#isee-carreaux-dataset)
+  - [INSEE Carreaux dataset](#isee-carreaux-dataset)
 - [Methodology:](#methodology)
   - [Script that allows users to input their own data](#script-that-allows-users-to-input-their-own-data)
   - [Building isochrones](#building-isochrones)
@@ -73,7 +73,7 @@ The second feature focuses on computing accessibility measures for various ameni
 The Base Permanente des Équipements (BPE) is a comprehensive dataset provided by INSEE, cataloging a wide range of public equipment and amenities across France. It is updated annually and covers the entire national territory, including both metropolitan France and overseas departments. 
 It includes over 200 types of amenities, spanning sectors such as transportation, healthcare, education, commerce, and public amenities, provides detailed geolocation and classification of amenities at a granular spatial level and facilitates analysis of territorial inequalities, access to amenities, and urban and rural infrastructure distribution. For the purposes of this study, a subset of amenity categories was selected based on their relevance to urban accessibility and public well-being. Notably, the BPE contains approximately 2.8 million individual amenity records.
 
-### ISEE Carreaux dataset
+### INSEE Carreaux dataset
 The INSEE Carreaux dataset provides a high-resolution spatial grid covering the entire French territory, including overseas departments. Each carreau represents a 200m x 200m cell and constitutes the smallest geographical unit provided by INSEE to describe population and housing distribution across France and the DOM-TOM. It is importante to note that a carreau is included in the dataset if at least one household is present within the cell. Also, for confidentiality reasons, cells containing fewer than 11 households are statistically imputed.
 Overall, the dataset includes more than 2.3 million individual carreaux, each enriched with socio-demographic information such as population count, income levels, household composition, and indicators of social housing, among others. This fine spatial granularity allows for detailed analysis of local inequalities in accessibility and livability. It also facilitates spatial joins with geolocated amenities—such as those in the BPE dataset—and serves as the geographic foundation for computing accessibility and livability scores across metropolitan France, La Réunion, and Martinique.
 
