@@ -1,4 +1,4 @@
-# i WANT TO PUT THIS IN A README FILE in github : Literature review on healthy urban planning
+# Healthy Urban Planning : Accesibility and modes of access to various urban spaces
 
 ## Description of our objectives
 
