@@ -5,7 +5,6 @@ Students : Salma El Aazdoudi, Robert Campbell Powers, Mona Bennis and Sofia Vaca
 
 Under the supervision of : Pierre Boyer (Ecole Polytechnique, CREST) & Franck Malherbet (ENSAE, CNRS)
 
-For any questions, clarifications, or citation requests, please contact: salma.el-aazdoudi@polytechnique.edu
 
 # Table of Contents
 
